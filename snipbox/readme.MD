@@ -23,12 +23,12 @@ Follow the steps below to set up and run the SnipBox application locally:
    ```bash
    python manage.py migrate
    ```
-6. Create a Superuser:
+5. Create a Superuser:
    ```bash
    python manage.py createsuperuser
    ```
 
-7. Run the Server:
+6. Run the Server:
    ```bash
    python manage.py runserver
    ```

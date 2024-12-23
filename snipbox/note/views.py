@@ -32,7 +32,12 @@ class SnippetViewSet(APIView):
             filter_args = {"id": kwargs["pk"]}
         else:
             filter_args = {}
-        snippets = Snippet.objects.filter(created_by=request.user, existence_status=1, **filter_args)
+        snippets = Snippet.objects.filter(
+            created_by=request.user,
+            existence_status=1,
+            **filter_args
+        ).select_related('created_by', 'tag')
+
         snippet_data = [
             {
                 "id": snippet.id,
@@ -115,13 +120,15 @@ class TagViewSet(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        filter_args = {'existence_status': 1}
         if 'pk' in kwargs:
             try:
                 tag = Tag.objects.get(pk=kwargs['pk'])
+                filter_args['tag'] = tag
             except Tag.DoesNotExist:
                 return Response({"detail": "Tag not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            snippets = tag.snippets.all()
+            snippets = Snippet.objects.filter(**filter_args).select_related('created_by', 'tag')
             snippet_data = [
                 {
                     "id": snippet.id,
@@ -137,7 +144,7 @@ class TagViewSet(APIView):
             ]
             return Response(snippet_data)
 
-        tags_query = Tag.objects.filter()
+        tags_query = Tag.objects.all()
         tags = [
             {
                 "id": tag.id,
